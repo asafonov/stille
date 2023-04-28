@@ -12,8 +12,6 @@ const showLoginForm = f => {
 }
 
 const getAccessToken = async (userId, password) => {
-  console.log(userId, password)
-  return
   const response = await matrixClient.login('m.login.password', {
     user: userId,
     password: password
