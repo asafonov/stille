@@ -14,10 +14,11 @@ const save = () => {
 const get = name => config[name]
 const set = (name, value) => config[name] = value
 const unset = name => delete config[name]
+const join = data => config = {...config, ...data}
 
 try {
   config = require(process.env.HOME + '/.config/mtrxrc')
 } catch {
-  config = {homeserver: 'https://matrix.org'}
+  config = {}
 }
-module.exports = {get: get, set: set, unset: unset, save: save}
+module.exports = {get: get, set: set, unset: unset, join: join, save: save}

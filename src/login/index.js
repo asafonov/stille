@@ -3,10 +3,12 @@ const showLoginForm = f => {
     input: process.stdin,
     output: process.stdout
   })
-  readline.question('userId: ', userId => {
-    readline.question('password: ', password => {
-      readline.close()
-      return f(userId, password)
+  readline.question('host: ', host => {
+    readline.question('user: ', user => {
+      readline.question('password: ', password => {
+        readline.close()
+          return f(host, user, password)
+      })
     })
   })
 }
@@ -19,34 +21,41 @@ const getAccessToken = async (userId, password, matrix) => {
   return response.access_token
 }
 
+genConfigData = (user, host) => {
+  return {
+    baseUrl: `https://${host}`,
+    userId: `@${user}:${host}`
+  }
+}
+
 module.exports.login = async () => {
   const sdk = require("matrix-js-sdk")
   const config = require('../config')
-  const baseUrl = config.get('homeserver')
   let accessToken = config.get('accessToken')
-  const userId = config.get('userId')
-  const data = {baseUrl: baseUrl}
-
-  if (accessToken) {
-    data['accessToken'] = accessToken
-    data['userId'] = userId
-  }
-
-  const matrix = sdk.createClient(data)
+  let matrix
 
   if (! accessToken) {
-    showLoginForm(async (userId, password) => {
-      const accessToken = await getAccessToken(userId, password, matrix)
+    showLoginForm(async (host, user, password) => {
+      const data = genConfigData(user, host)
+      matrix = sdk.createClient(data)
+      accessToken = await getAccessToken(user, password, matrix)
 
       if (accessToken) {
-        config.set('userId', userId)
         config.set('accessToken', accessToken)
+        config.set('baseUrl', data.baseUrl)
+        config.set('userId', data.userId)
         config.save()
         matrix.startClient()
       }
     })
   } else {
+    const baseUrl = config.get('baseUrl')
+    const userId = config.get('userId')
+    matrix = sdk.createClient({
+      baseUrl: baseUrl,
+      accessToken: accessToken,
+      userId: userId
+    })
     matrix.startClient()
   }
-
 }
