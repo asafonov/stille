@@ -1,3 +1,6 @@
+const sdk = require("matrix-js-sdk")
+const config = require('../config')
+
 const showLoginForm = f => {
   const readline = require('readline').createInterface({
     input: process.stdin,
@@ -25,20 +28,29 @@ genConfigData = (user, host) => {
   return {
     baseUrl: `https://${host}`,
     userId: `@${user}:${host}`,
-    deviceId: `mtrxrc`
+    deviceId: `mtrxrc`,
+    sessionStore: new sdk.MemoryStore(),
+    cryptoStore: new sdk.MemoryCryptoStore()
   }
 }
 
+getConnectData = data => {
+  const initialData = {
+    baseUrl: config.get('baseUrl'),
+    userId: config.get('userId'),
+    deviceId: config.get('deviceId')
+  }
+  return {...initialData, ...data}
+}
+
 module.exports.login = async () => {
-  const sdk = require("matrix-js-sdk")
-  const config = require('../config')
   let accessToken = config.get('accessToken')
   let matrix
 
   if (! accessToken) {
     showLoginForm(async (host, user, password) => {
       const data = genConfigData(user, host)
-      matrix = sdk.createClient(data)
+      matrix = sdk.createClient(getConnectData(data))
       await matrix.initCrypto()
       accessToken = await getAccessToken(user, password, matrix)
 
@@ -52,15 +64,11 @@ module.exports.login = async () => {
       }
     })
   } else {
-    const baseUrl = config.get('baseUrl')
-    const userId = config.get('userId')
-    const deviceId = config.get('deviceId')
-    matrix = sdk.createClient({
-      baseUrl: baseUrl,
-      accessToken: accessToken,
-      userId: userId,
-      deviceId: deviceId
-    })
+    matrix = sdk.createClient(
+      getConnectData({
+        accessToken: accessToken,
+      })
+    )
     matrix.startClient()
   }
 }
