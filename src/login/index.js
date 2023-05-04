@@ -27,18 +27,14 @@ const getAccessToken = async (userId, password, matrix) => {
 genConfigData = (user, host) => {
   return {
     baseUrl: `https://${host}`,
-    userId: `@${user}:${host}`,
-    deviceId: `mtrxrc`,
-    sessionStore: new sdk.MemoryStore(),
-    cryptoStore: new sdk.MemoryCryptoStore()
+    userId: `@${user}:${host}`
   }
 }
 
 getConnectData = data => {
   const initialData = {
     baseUrl: config.get('baseUrl'),
-    userId: config.get('userId'),
-    deviceId: config.get('deviceId')
+    userId: config.get('userId')
   }
   return {...initialData, ...data}
 }
@@ -51,14 +47,12 @@ module.exports.login = async () => {
     showLoginForm(async (host, user, password) => {
       const data = genConfigData(user, host)
       matrix = sdk.createClient(getConnectData(data))
-      await matrix.initCrypto()
       accessToken = await getAccessToken(user, password, matrix)
 
       if (accessToken) {
         config.set('accessToken', accessToken)
         config.set('baseUrl', data.baseUrl)
         config.set('userId', data.userId)
-        config.set('deviceId', data.deviceId)
         config.save()
         matrix.startClient()
       }
