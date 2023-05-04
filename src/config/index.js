@@ -18,7 +18,7 @@ const unset = name => delete config[name]
 const join = data => config = {...config, ...data}
 
 try {
-  config = require(process.env.HOME + '/.config/mtrxrc')
+  config = require(filename)
 } catch {
   config = {}
 }
