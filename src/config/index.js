@@ -1,4 +1,5 @@
-const filename = process.env.HOME + '/.config/mtrxrc'
+const name = process.argv[2] || 'mtrxrc'
+const filename = `${process.env.HOME}/.config/${name}.mtrxrc`
 let config
 const save = () => {
   let data = 'module.exports = {\n'
