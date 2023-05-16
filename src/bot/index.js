@@ -69,15 +69,24 @@ const login = async (f) => {
   }
 }
 
-const init = () => {
+const init = onMessage => {
   login(matrix => {
     const userId = config.get('userId')
-    console.log('Listening to room membership changes')
-    matrix.on("RoomMember.membership", (event, member) => {
-      console.log('New event', member)
+    matrix.on('RoomMember.membership', (event, member) => {
       if (member.membership === 'invite' && member.userId === userId) {
         matrix.joinRoom(member.roomId)
       }
+    })
+    matrix.on('Room.timeline', (event, room, toStartOfTimeline) => {
+      if (toStartOfTimeline) {
+        return
+      }
+
+      if (event.getType() !== 'm.room.message') {
+        return
+      }
+
+      console.log(new Date().getTime() - event.localTimestamp, event.getContent().body)
     })
   })
 }
