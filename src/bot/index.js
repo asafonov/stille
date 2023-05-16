@@ -10,7 +10,7 @@ const showLoginForm = f => {
     readline.question('user: ', user => {
       readline.question('password: ', password => {
         readline.close()
-          return f(host, user, password)
+        return f(host, user, password)
       })
     })
   })
@@ -24,14 +24,14 @@ const getAccessToken = async (userId, password, matrix) => {
   return response.access_token
 }
 
-genConfigData = (user, host) => {
+const genConfigData = (user, host) => {
   return {
     baseUrl: `https://${host}`,
     userId: `@${user}:${host}`
   }
 }
 
-getConnectData = data => {
+const getConnectData = data => {
   const initialData = {
     baseUrl: config.get('baseUrl'),
     userId: config.get('userId')
@@ -39,7 +39,7 @@ getConnectData = data => {
   return {...initialData, ...data}
 }
 
-module.exports.login = async () => {
+const login = async (f) => {
   let accessToken = config.get('accessToken')
   let matrix
 
@@ -55,6 +55,7 @@ module.exports.login = async () => {
         config.set('userId', data.userId)
         config.save()
         matrix.startClient()
+        f(matrix)
       }
     })
   } else {
@@ -64,5 +65,23 @@ module.exports.login = async () => {
       })
     )
     matrix.startClient()
+    f(matrix)
   }
+}
+
+const init = () => {
+  login(matrix => {
+    const userId = config.get('userId')
+    console.log('Listening to room membership changes')
+    matrix.on("RoomMember.membership", (event, member) => {
+      console.log('New event', member)
+      if (member.membership === 'invite' && member.userId === userId) {
+        matrix.joinRoom(member.roomId)
+      }
+    })
+  })
+}
+
+module.exports = {
+  init: init
 }

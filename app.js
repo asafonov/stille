@@ -1,2 +1,7 @@
-const login = require('./src/login')
-login.login()
+const bot = require('./src/bot')
+
+const app = async () => {
+  bot.init()  
+}
+
+app()
