@@ -39,7 +39,7 @@ const getConnectData = data => {
   return {...initialData, ...data}
 }
 
-const login = async (f) => {
+const login = async f => {
   let accessToken = config.get('accessToken')
   let matrix
 
@@ -54,7 +54,6 @@ const login = async (f) => {
         config.set('baseUrl', data.baseUrl)
         config.set('userId', data.userId)
         config.save()
-        matrix.startClient()
         f(matrix)
       }
     })
@@ -64,29 +63,52 @@ const login = async (f) => {
         accessToken: accessToken,
       })
     )
-    matrix.startClient()
     f(matrix)
   }
 }
 
-const init = onMessage => {
+const subscribe = (matrix, plugins) => {
+  matrix.startClient()
+  const userId = config.get('userId')
+
+  matrix.on('RoomMember.membership', (event, member) => {
+    if (member.membership === 'invite' && member.userId === userId) {
+      matrix.joinRoom(member.roomId)
+    }
+  })
+
+  matrix.on('Room.timeline', (event, room, toStartOfTimeline) => {
+    if (toStartOfTimeline) {
+      return
+    }
+
+    if (event.getType() !== 'm.room.message') {
+      return
+    }
+
+    const age = new Date().getTime() - event.localTimestamp
+
+    if (age <= 60000) {
+      plugins.onMessage(room.roomId, event.getContent().body)
+    }
+  })
+}
+
+const initPlugins = (plugins, f) => {
+  const fs = []
+
+  for (let i = 0; i < plugins.length; ++i) {
+    const _f = i === 0 ? f : f[i - 1]
+    fs[i] = 'init' in plugins[i] ? () => plugins[i].init(_f) : _f
+  }
+
+  fs[fs.length - 1]()
+}
+
+const init = plugins => {
   login(matrix => {
-    const userId = config.get('userId')
-    matrix.on('RoomMember.membership', (event, member) => {
-      if (member.membership === 'invite' && member.userId === userId) {
-        matrix.joinRoom(member.roomId)
-      }
-    })
-    matrix.on('Room.timeline', (event, room, toStartOfTimeline) => {
-      if (toStartOfTimeline) {
-        return
-      }
-
-      if (event.getType() !== 'm.room.message') {
-        return
-      }
-
-      console.log(new Date().getTime() - event.localTimestamp, event.getContent().body)
+    initPlugins(plugins, () => {
+      subscribe(matrix, plugins)
     })
   })
 }
