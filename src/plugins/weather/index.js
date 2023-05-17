@@ -25,8 +25,14 @@ const init = f => {
   }
 }
 
-const onMessage = (message) => {
-  return `I've got the ${message}`
+const onMessage = async message => {
+  if (message.substr(0, 11) === 'weather in ') {
+    const place = message.substr(11)
+    const api = `https://api.openweathermap.org/data/2.5/weather?q=${place}&APPID=${apiKey}`
+    const response = await fetch(api)
+    const data = await response.json()
+    return `${Math.floor(data.main.temp - 273)}, ${data.weather[0].main}`
+  }
 }
 
 module.exports = {
