@@ -25,7 +25,8 @@ const init = f => {
   }
 }
 
-const onMessage = (roomId, message) => {
+const onMessage = (message) => {
+  return `I've got the ${message}`
 }
 
 module.exports = {

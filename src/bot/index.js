@@ -77,7 +77,7 @@ const subscribe = (matrix, plugins) => {
     }
   })
 
-  matrix.on('Room.timeline', (event, room, toStartOfTimeline) => {
+  matrix.on('Room.timeline', async (event, room, toStartOfTimeline) => {
     if (toStartOfTimeline) {
       return
     }
@@ -86,10 +86,19 @@ const subscribe = (matrix, plugins) => {
       return
     }
 
+    if (event.sender.userId === userId) {
+      return
+    }
+
     const age = new Date().getTime() - event.localTimestamp
 
-    if (age <= 60000) {
-      plugins.onMessage(room.roomId, event.getContent().body)
+    if (age > 60000) {
+      return
+    }
+
+    for (let i = 0; i < plugins.length; ++i) {
+      const reply = await plugins[i].onMessage(event.getContent().body)
+      reply && matrix.sendEvent(room.roomId, 'm.room.message', {msgtype: 'm.text', body: reply}, '')
     }
   })
 }
