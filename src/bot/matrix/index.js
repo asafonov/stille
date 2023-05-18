@@ -107,7 +107,7 @@ const initPlugins = (plugins, f) => {
   const fs = []
 
   for (let i = 0; i < plugins.length; ++i) {
-    const _f = i === 0 ? f : f[i - 1]
+    const _f = i === 0 ? f : fs[i - 1]
     fs[i] = 'init' in plugins[i] ? () => plugins[i].init(_f) : _f
   }
 
