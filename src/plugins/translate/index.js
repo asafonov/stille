@@ -6,7 +6,7 @@ const showSettingsForm = f => {
     input: process.stdin,
     output: process.stdout
   })
-  readline.question('LibreTranslate API Key: ', apiKey => {
+  readline.question('Translate.com API Key: ', apiKey => {
     readline.close()
     return f(apiKey)
   })
@@ -29,19 +29,20 @@ const init = f => {
 const onMessage = async message => {
   if (message.substr(0, 10).toLowerCase() === 'translate ') {
     const q = message.substr(10)
-    const response = await fetch('https://libretranslate.com/translate', {
+    const body = new URLSearchParams({
+      text: q,
+      source_language: 'en',
+      translation_language: 'ru'
+    }).toString()
+    const response = await fetch('https://translation-api.translate.com/translate/v1/mt', {
       method: 'POST',
-      body: JSON.stringify({
-        q: q,
-        source: 'auto',
-        target: 'ru',
-        format: 'text',
-        api_key: apiKey
-      }),
-      headers: {'Content-Type': 'application/json'}
+      body: body,
+      headers: {'x-api-key': apiKey, 'Content-Type': 'application/x-www-form-urlencoded'}
     })
     const data = await response.json()
-    return data.translatedText || q
+    console.log(body)
+    console.log(data)
+    return data.translation || q
   }
 }
 
