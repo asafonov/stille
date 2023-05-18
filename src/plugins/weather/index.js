@@ -62,7 +62,7 @@ const getWindDirection = degrees => {
 }
 
 const onMessage = async message => {
-  if (message.substr(0, 11) === 'weather in ') {
+  if (message.substr(0, 11).toLowerCase() === 'weather in ') {
     const place = message.substr(11)
     const api = `https://api.openweathermap.org/data/2.5/weather?q=${place}&APPID=${apiKey}`
     const response = await fetch(api)
