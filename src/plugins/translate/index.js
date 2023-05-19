@@ -25,7 +25,6 @@ const init = f => {
   }
 }
 
-
 const onMessage = async message => {
   if (message.substr(0, 10).toLowerCase() === 'translate ') {
     const q = message.substr(10)
@@ -40,8 +39,6 @@ const onMessage = async message => {
       headers: {'x-api-key': apiKey, 'Content-Type': 'application/x-www-form-urlencoded'}
     })
     const data = await response.json()
-    console.log(body)
-    console.log(data)
     return data.translation || q
   }
 }
