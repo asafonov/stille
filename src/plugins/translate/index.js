@@ -1,5 +1,6 @@
 const config = require('../../config')
-let apiKey = config.get('translate_apiKey')
+const configPrefix = 'translate_'
+let apiKey = config.get(`${configPrefix}apiKey`)
 
 const showSettingsForm = f => {
   const readline = require('readline').createInterface({
@@ -16,7 +17,7 @@ const init = f => {
   if (! apiKey) {
     showSettingsForm(apiKey => {
       apiKey = apiKey
-      config.set('translate_apiKey', apiKey)
+      config.set(`${configPrefix}apiKey`, apiKey)
       config.save()
       f()
     })
@@ -30,8 +31,8 @@ const onMessage = async message => {
     const q = message.substr(10)
     const body = new URLSearchParams({
       text: q,
-      source_language: 'en',
-      translation_language: 'ru'
+      source_language: config.get(`${configPrefix}to`) || 'en',
+      translation_language: config.get(`${configPrefix}from`) || 'ru'
     }).toString()
     const response = await fetch('https://translation-api.translate.com/translate/v1/mt', {
       method: 'POST',
@@ -40,6 +41,10 @@ const onMessage = async message => {
     })
     const data = await response.json()
     return data.translation || q
+  } else if (message.substr(0, 11).toLowerCase() === '!translate ') {
+    const q = message.substr(11).split(' ')
+    config.set(`${configPrefix}${q[0]}`, q[1])
+    config.save()
   }
 }
 
