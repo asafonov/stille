@@ -61,13 +61,32 @@ const getWindDirection = degrees => {
   }
 }
 
+const formatWeatherData = data => {
+  return `${Math.floor(data.main.temp - 273)}, ${data.weather[0].description}, feels like ${Math.floor(data.main.feels_like - 273)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.direction)}\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg\nHumidity: ${data.main.humidity}%`
+}
+
+const requestApi = async (type, place) => {
+  const api = `https://api.openweathermap.org/data/2.5/${type}?q=${place}&APPID=${apiKey}`
+  const response = await fetch(api)
+  const data = await response.json()
+  return data
+}
+
 const onMessage = async message => {
   if (message.substr(0, 11).toLowerCase() === 'weather in ') {
     const place = message.substr(11)
-    const api = `https://api.openweathermap.org/data/2.5/weather?q=${place}&APPID=${apiKey}`
-    const response = await fetch(api)
-    const data = await response.json()
-    return `${Math.floor(data.main.temp - 273)}, ${data.weather[0].description}, feels like ${Math.floor(data.main.feels_like - 273)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.direction)}\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg\nHumidity: ${data.main.humidity}%`
+    const data = await requestApi('weather', place)
+    return formatWeatherData(data)
+  } else if (message.substr(0, 12).toLowerCase() === 'forecast in ') {
+    const place = message.substr(12)
+    const data = await requestApi('forecast', place)
+    const ret = []
+
+    for (let i = 0; i < 3; ++i) {
+      ret.push(data.list[i]['dt_txt'] + ': ' + formatWeatherData(data.list[i]))
+    }
+
+    return ret.join('\n\n')
   }
 }
 

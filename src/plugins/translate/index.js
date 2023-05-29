@@ -31,8 +31,8 @@ const onMessage = async message => {
     const q = message.substr(10)
     const body = new URLSearchParams({
       text: q,
-      source_language: config.get(`${configPrefix}to`) || 'en',
-      translation_language: config.get(`${configPrefix}from`) || 'ru'
+      source_language: config.get(`${configPrefix}from`) || 'en',
+      translation_language: config.get(`${configPrefix}to`) || 'ru'
     }).toString()
     const response = await fetch('https://translation-api.translate.com/translate/v1/mt', {
       method: 'POST',
