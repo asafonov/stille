@@ -62,7 +62,7 @@ const getWindDirection = degrees => {
 }
 
 const formatWeatherData = data => {
-  return `${Math.floor(data.main.temp - 273)}, ${data.weather[0].description}, feels like ${Math.floor(data.main.feels_like - 273)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.direction)}\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg\nHumidity: ${data.main.humidity}%`
+  return `${Math.floor(data.main.temp - 273)}, ${data.weather[0].description}, feels like ${Math.floor(data.main.feels_like - 273)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.direction)}\nClouds: ${data.clouds.all}%, Rain: ${data.rain ? (data.rain['3h'] ? '3h - ' + data.rain['3h'] : '1h - ' + data.rain['1h']) : '0'}mm\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg, Humidity: ${data.main.humidity}%`
 }
 
 const requestApi = async (type, place) => {
@@ -83,7 +83,8 @@ const onMessage = async message => {
     const ret = []
 
     for (let i = 0; i < 3; ++i) {
-      ret.push(data.list[i]['dt_txt'] + ': ' + formatWeatherData(data.list[i]))
+      const date = new Date(data.list[i]['dt'] * 1000 + data.city.timezone * 1000).toISOString().substr(11, 5)
+      ret.push(date + ': ' + formatWeatherData(data.list[i]))
     }
 
     return ret.join('\n\n')
