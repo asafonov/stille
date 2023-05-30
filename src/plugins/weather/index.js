@@ -80,9 +80,10 @@ const onMessage = async message => {
   } else if (message.substr(0, 12).toLowerCase() === 'forecast in ') {
     const place = message.substr(12)
     const data = await requestApi('forecast', place)
-    const ret = []
+    const now = await requestApi('weather', place)
+    const ret = [`now: ${formatWeatherData(now)}`]
 
-    for (let i = 0; i < 3; ++i) {
+    for (let i = 0; i < 5; ++i) {
       const date = new Date(data.list[i]['dt'] * 1000 + data.city.timezone * 1000).toISOString().substr(11, 5)
       ret.push(date + ': ' + formatWeatherData(data.list[i]))
     }
