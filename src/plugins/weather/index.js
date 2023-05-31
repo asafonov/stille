@@ -61,8 +61,12 @@ const getWindDirection = degrees => {
   }
 }
 
+const formatTemp = temp => {
+  return Math.floor(temp - 273)
+}
+
 const formatWeatherData = data => {
-  return `${Math.floor(data.main.temp - 273)}, ${data.weather[0].description}, feels like ${Math.floor(data.main.feels_like - 273)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.direction)}\nClouds: ${data.clouds.all}%, Rain: ${data.rain ? (data.rain['3h'] ? '3h - ' + data.rain['3h'] : '1h - ' + data.rain['1h']) : '0'}mm\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg, Humidity: ${data.main.humidity}%`
+  return `${formatTemp(data.main.temp)}, ${data.weather[0].description}, feels like ${formatTemp(data.main.feels_like)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.direction)}\nClouds: ${data.clouds.all}%, Rain: ${data.rain ? (data.rain['3h'] ? '3h - ' + data.rain['3h'] : '1h - ' + data.rain['1h']) : '0'}mm\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg, Humidity: ${data.main.humidity}%`
 }
 
 const requestApi = async (type, place) => {
@@ -72,23 +76,47 @@ const requestApi = async (type, place) => {
   return data
 }
 
+const weather = async place => {
+  const data = await requestApi('forecast', place)
+  const now = await requestApi('weather', place)
+  const ret = [`now: ${formatWeatherData(now)}`]
+
+  for (let i = 0; i < 5; ++i) {
+    const date = new Date(data.list[i].dt * 1000 + data.city.timezone * 1000).toISOString().substr(11, 5)
+    ret.push(date + ': ' + formatWeatherData(data.list[i]))
+  }
+
+  return ret.join('\n\n')
+}
+
+const forecast = async place => {
+  const data = await requestApi('forecast', place)
+  const ret = {}
+
+  for (let i = 0; i < data.list.length; ++i) {
+    const w = data.list[i]
+    const date = new Date(data.list[i].dt * 1000 + data.city.timezone * 1000).toISOString()
+    const day = date.substr(0, 10)
+    const hour = date.substr(11, 2)
+    if (! ret[day]) ret[day] = {}
+
+    if (! ret[day].day || (hour > 12 && hour <=15)) {
+      ret[day].day = formatTemp(w.main.temp)
+    }
+
+    if (! ret[day].night || hour > 1 && hour <= 4) {
+      ret[day].night = formatTemp(w.main.temp)
+    }
+  }
+}
+
 const onMessage = async message => {
   if (message.substr(0, 11).toLowerCase() === 'weather in ') {
     const place = message.substr(11)
-    const data = await requestApi('weather', place)
-    return formatWeatherData(data)
+    return await weather(place)
   } else if (message.substr(0, 12).toLowerCase() === 'forecast in ') {
     const place = message.substr(12)
-    const data = await requestApi('forecast', place)
-    const now = await requestApi('weather', place)
-    const ret = [`now: ${formatWeatherData(now)}`]
-
-    for (let i = 0; i < 5; ++i) {
-      const date = new Date(data.list[i]['dt'] * 1000 + data.city.timezone * 1000).toISOString().substr(11, 5)
-      ret.push(date + ': ' + formatWeatherData(data.list[i]))
-    }
-
-    return ret.join('\n\n')
+    return await forecast(place)
   }
 }
 
