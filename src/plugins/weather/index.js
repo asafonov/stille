@@ -61,12 +61,24 @@ const getWindDirection = degrees => {
   }
 }
 
+const getConciseWindDirection = degrees => {
+  if (degrees > 315 || degrees <= 45) {
+    return 'N'
+  } else if (degrees > 45 && degrees <= 135) {
+    return 'E'
+  } else if (degrees > 135 && degrees <= 225) {
+    return 'S'
+  } else {
+    return 'W'
+  }
+}
+
 const formatTemp = temp => {
   return Math.floor(temp - 273)
 }
 
 const formatWeatherData = data => {
-  return `${formatTemp(data.main.temp)}, ${data.weather[0].description}, feels like ${formatTemp(data.main.feels_like)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.direction)}\nClouds: ${data.clouds.all}%, Rain: ${data.rain ? (data.rain['3h'] ? '3h - ' + data.rain['3h'] : '1h - ' + data.rain['1h']) : '0'}mm\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg, Humidity: ${data.main.humidity}%`
+  return `${formatTemp(data.main.temp)}, ${data.weather[0].description}, feels like ${formatTemp(data.main.feels_like)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.deg)}\nClouds: ${data.clouds.all}%, Rain: ${data.rain ? (data.rain['3h'] ? '3h - ' + data.rain['3h'] : '1h - ' + data.rain['1h']) : '0'}mm\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg, Humidity: ${data.main.humidity}%`
 }
 
 const requestApi = async (type, place) => {
@@ -98,7 +110,10 @@ const forecast = async place => {
     const date = new Date(data.list[i].dt * 1000 + data.city.timezone * 1000).toISOString()
     const day = date.substr(0, 10)
     const hour = date.substr(11, 2)
-    if (! ret[day]) ret[day] = {}
+    if (! ret[day]) ret[day] = {
+      descr: {},
+      wind: {}
+    }
 
     if (! ret[day].day || (hour > 12 && hour <=15)) {
       ret[day].day = formatTemp(w.main.temp)
@@ -107,7 +122,23 @@ const forecast = async place => {
     if (! ret[day].night || hour > 1 && hour <= 4) {
       ret[day].night = formatTemp(w.main.temp)
     }
+
+    ret[day].descr[w.weather[0].main] = (ret[day].descr[w.weather[0].main] || 0) + 1
+    const wd = getConciseWindDirection(w.wind.deg)
+    ret[day].wind[wd] = (ret[day].wind[wd] || 0) + 1
   }
+
+  const f = []
+
+  for (let i in ret) {
+    const descr = Object.keys(ret[i].descr)
+    descr.sort((a, b) => ret[i].descr[a] > ret[i].descr[b] ? -1 : 1)
+    const wind = Object.keys(ret[i].wind)
+    wind.sort((a, b) => ret[i].wind[a] > ret[i].wind[b] ? -1 : 1)
+    f.push(`${i}: ${ret[i].day} / ${ret[i].night}, ${descr.join(', ')}, Wind: ${wind.join(', ')}`)
+  }
+
+  return f.join('\n')
 }
 
 const onMessage = async message => {
