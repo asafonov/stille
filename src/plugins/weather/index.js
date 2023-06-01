@@ -118,13 +118,19 @@ const forecast = async place => {
         temp: null,
         descr: {},
         wind: {},
-        speed: {min: null, max: null}
+        speed: {min: null, max: null},
+        rain: 0,
+        snow: 0,
+        clouds: {min: null, max: null}
       },
       night: {
         temp: null,
         descr: {},
         wind: {},
-        speed: {min: null, max: null}
+        speed: {min: null, max: null},
+        rain: 0,
+        snow: 0,
+        clouds: {min: null, max: null}
       }
     }
 
@@ -140,6 +146,8 @@ const forecast = async place => {
     ret[day][dayOrNight].descr[w.weather[0].main] = (ret[day][dayOrNight].descr[w.weather[0].main] || 0) + 1
     const wd = getConciseWindDirection(w.wind.deg)
     ret[day][dayOrNight].wind[wd] = (ret[day][dayOrNight].wind[wd] || 0) + 1
+    ret[day][dayOrNight].rain += w.rain ? w.rain['3h'] || w.rain['1h'] : 0
+    ret[day][dayOrNight].snow += w.snow ? w.snow['3h'] || w.snow['1h'] : 0
 
     if (ret[day][dayOrNight].speed.min === null || w.wind.speed < ret[day][dayOrNight].speed.min) {
       ret[day][dayOrNight].speed.min = w.wind.speed
@@ -148,26 +156,39 @@ const forecast = async place => {
     if (ret[day][dayOrNight].speed.max === null || w.wind.speed > ret[day][dayOrNight].speed.max) {
       ret[day][dayOrNight].speed.max = w.wind.speed
     }
+
+    if (ret[day][dayOrNight].clouds.min === null || w.clouds.all < ret[day][dayOrNight].clouds.min) {
+      ret[day][dayOrNight].clouds.min = w.clouds.all
+    }
+
+    if (ret[day][dayOrNight].clouds.max === null || w.clouds.all > ret[day][dayOrNight].clouds.max) {
+      ret[day][dayOrNight].clouds.max = w.clouds.all
+    }
   }
 
   const f = []
-  console.log(ret)
 
   for (let i in ret) {
-    f.push(i)
+    let s = `${i}`
+
     for (let dayOrNight of ['day', 'night']) {
       const descr = Object.keys(ret[i][dayOrNight].descr)
       const wind = Object.keys(ret[i][dayOrNight].wind)
       wind.sort((a, b) => ret[i][dayOrNight].wind[a] > ret[i][dayOrNight].wind[b] ? -1 : 1)
       const windSpeed = ret[i][dayOrNight].speed.min < ret[i][dayOrNight].speed.max ? ret[i][dayOrNight].speed.min + ' - ' + ret[i][dayOrNight].speed.max + 'm/s' : ret[i][dayOrNight].speed.max + 'm/s'
+      const clouds = ret[i][dayOrNight].clouds.min < ret[i][dayOrNight].clouds.max ? ret[i][dayOrNight].clouds.min + ' - ' + ret[i][dayOrNight].clouds.max + '%' : ret[i][dayOrNight].clouds.max + '%'
 
       if (descr.length > 0) {
-        f.push(`${dayOrNight}: ${ret[i][dayOrNight].temp}, ${descr.join(', ')}. Wind: ${wind[0]}, ${windSpeed}`)
+        s += `\n${dayOrNight}: ${ret[i][dayOrNight].temp}, ${descr.join(', ')}\nWind: ${wind[0]}, ${windSpeed}\nClouds: ${clouds}`
+        s += ret[i][dayOrNight].rain ? `\nRain: ${ret[i][dayOrNight].rain.toFixed(2)}mm` : ''
+        s += ret[i][dayOrNight].snow ? `\nSnow: ${ret[i][dayOrNight].snow.toFixed(2)}mm` : ''
       }
     }
+
+    f.push(s)
   }
 
-  return f.join('\n')
+  return f.join('\n\n')
 }
 
 const onMessage = async message => {
