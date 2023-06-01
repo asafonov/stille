@@ -101,6 +101,9 @@ const weather = async place => {
   return ret.join('\n\n')
 }
 
+const isDay = hour => hour >=9 && hour < 21
+const getDayOrNight = hour => isDay(hour) ? 'day' : 'night'
+
 const forecast = async place => {
   const data = await requestApi('forecast', place)
   const ret = {}
@@ -111,31 +114,57 @@ const forecast = async place => {
     const day = date.substr(0, 10)
     const hour = date.substr(11, 2)
     if (! ret[day]) ret[day] = {
-      descr: {},
-      wind: {}
+      day: {
+        temp: null,
+        descr: {},
+        wind: {},
+        speed: {min: null, max: null}
+      },
+      night: {
+        temp: null,
+        descr: {},
+        wind: {},
+        speed: {min: null, max: null}
+      }
     }
 
-    if (! ret[day].day || (hour > 12 && hour <=15)) {
-      ret[day].day = formatTemp(w.main.temp)
+    if (ret[day].day.temp === null || (hour > 12 && hour <=15)) {
+      ret[day].day.temp = formatTemp(w.main.temp)
     }
 
-    if (! ret[day].night || hour > 1 && hour <= 4) {
-      ret[day].night = formatTemp(w.main.temp)
+    if (ret[day].night.temp === null || hour > 1 && hour <= 4) {
+      ret[day].night.temp = formatTemp(w.main.temp)
     }
 
-    ret[day].descr[w.weather[0].main] = (ret[day].descr[w.weather[0].main] || 0) + 1
+    const dayOrNight = getDayOrNight(hour)
+    ret[day][dayOrNight].descr[w.weather[0].main] = (ret[day][dayOrNight].descr[w.weather[0].main] || 0) + 1
     const wd = getConciseWindDirection(w.wind.deg)
-    ret[day].wind[wd] = (ret[day].wind[wd] || 0) + 1
+    ret[day][dayOrNight].wind[wd] = (ret[day][dayOrNight].wind[wd] || 0) + 1
+
+    if (ret[day][dayOrNight].speed.min === null || w.wind.speed < ret[day][dayOrNight].speed.min) {
+      ret[day][dayOrNight].speed.min = w.wind.speed
+    }
+
+    if (ret[day][dayOrNight].speed.max === null || w.wind.speed > ret[day][dayOrNight].speed.max) {
+      ret[day][dayOrNight].speed.max = w.wind.speed
+    }
   }
 
   const f = []
+  console.log(ret)
 
   for (let i in ret) {
-    const descr = Object.keys(ret[i].descr)
-    descr.sort((a, b) => ret[i].descr[a] > ret[i].descr[b] ? -1 : 1)
-    const wind = Object.keys(ret[i].wind)
-    wind.sort((a, b) => ret[i].wind[a] > ret[i].wind[b] ? -1 : 1)
-    f.push(`${i}: ${ret[i].day} / ${ret[i].night}, ${descr.join(', ')}, Wind: ${wind.join(', ')}`)
+    f.push(i)
+    for (let dayOrNight of ['day', 'night']) {
+      const descr = Object.keys(ret[i][dayOrNight].descr)
+      const wind = Object.keys(ret[i][dayOrNight].wind)
+      wind.sort((a, b) => ret[i][dayOrNight].wind[a] > ret[i][dayOrNight].wind[b] ? -1 : 1)
+      const windSpeed = ret[i][dayOrNight].speed.min < ret[i][dayOrNight].speed.max ? ret[i][dayOrNight].speed.min + ' - ' + ret[i][dayOrNight].speed.max + 'm/s' : ret[i][dayOrNight].speed.max + 'm/s'
+
+      if (descr.length > 0) {
+        f.push(`${dayOrNight}: ${ret[i][dayOrNight].temp}, ${descr.join(', ')}. Wind: ${wind[0]}, ${windSpeed}`)
+      }
+    }
   }
 
   return f.join('\n')
