@@ -78,7 +78,13 @@ const formatTemp = temp => {
 }
 
 const formatWeatherData = data => {
-  return `${formatTemp(data.main.temp)}, ${data.weather[0].description}, feels like ${formatTemp(data.main.feels_like)}\nWind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.deg)}\nClouds: ${data.clouds.all}%, Rain: ${data.rain ? (data.rain['3h'] ? '3h - ' + data.rain['3h'] : '1h - ' + data.rain['1h']) : '0'}mm\nPressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg, Humidity: ${data.main.humidity}%`
+  const rain = data.rain ? ', Rain: ' + (data.rain['3h'] ? data.rain['3h'] + 'mm/3h' : data.rain['1h'] + 'mm/h') : ''
+  const snow = data.snow ? ', Snow: ' + (data.snow['3h'] ? data.snow['3h'] + 'mm/3h' : data.snow['1h'] + 'mm/h') : ''
+
+  return `${formatTemp(data.main.temp)}, ${data.weather[0].description}, feels like ${formatTemp(data.main.feels_like)}\n`
+    + `Wind: ${data.wind.speed}m/s, ${getWindDirection(data.wind.deg)}\n`
+    + `Clouds: ${data.clouds.all}%${rain}${snow}\n`
+    + `Pressure: ${Math.floor((data.main.grnd_level || data.main.sea_level || data.main.pressure || 0) * 0.75006)}mmHg, Humidity: ${data.main.humidity}%`
 }
 
 const requestApi = async (type, place) => {
@@ -179,9 +185,9 @@ const forecast = async place => {
       const clouds = ret[i][dayOrNight].clouds.min < ret[i][dayOrNight].clouds.max ? ret[i][dayOrNight].clouds.min + ' - ' + ret[i][dayOrNight].clouds.max + '%' : ret[i][dayOrNight].clouds.max + '%'
 
       if (descr.length > 0) {
-        s += `\n${dayOrNight}: ${ret[i][dayOrNight].temp}, ${descr.join(', ')}\nWind: ${wind[0]}, ${windSpeed}\nClouds: ${clouds}`
-        s += ret[i][dayOrNight].rain ? `\nRain: ${ret[i][dayOrNight].rain.toFixed(2)}mm` : ''
-        s += ret[i][dayOrNight].snow ? `\nSnow: ${ret[i][dayOrNight].snow.toFixed(2)}mm` : ''
+        s += `\n${dayOrNight}: ${ret[i][dayOrNight].temp}, ${descr.join(', ')}. Wind: ${wind[0]}, ${windSpeed}\nClouds: ${clouds}`
+        s += ret[i][dayOrNight].rain ? `, Rain: ${ret[i][dayOrNight].rain.toFixed(2)}mm` : ''
+        s += ret[i][dayOrNight].snow ? `, Snow: ${ret[i][dayOrNight].snow.toFixed(2)}mm` : ''
       }
     }
 
