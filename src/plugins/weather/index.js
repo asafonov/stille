@@ -1,5 +1,5 @@
-const config = require('../../config').init()
-let apiKey = config.get('weather_apiKey')
+const config = require('../../config').init('weather')
+let apiKey = config.get('apiKey')
 
 const showSettingsForm = f => {
   const readline = require('readline').createInterface({
@@ -16,7 +16,7 @@ const init = f => {
   if (! apiKey) {
     showSettingsForm(apiKey => {
       apiKey = apiKey
-      config.set('weather_apiKey', apiKey)
+      config.set('apiKey', apiKey)
       config.save()
       f()
     })

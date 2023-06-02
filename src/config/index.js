@@ -4,7 +4,7 @@ const init = name => {
   if (! name) name = process.argv[2] || 'mtrxrc'
   if (data[name]) return data[name]
 
-  let filename = `${process.env.HOME}/.config/${name}.mtrxrc`
+  let filename = `${process.env.HOME}/.config/mtrxrc/${name}.mtrxrc`
   let config
 
   const init = name => {
