@@ -1,4 +1,4 @@
-const config = require('../../config')
+const config = require('../../config').init()
 const configPrefix = 'translate_'
 let apiKey = config.get(`${configPrefix}apiKey`)
 

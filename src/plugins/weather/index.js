@@ -1,4 +1,4 @@
-const config = require('../../config')
+const config = require('../../config').init()
 let apiKey = config.get('weather_apiKey')
 
 const showSettingsForm = f => {

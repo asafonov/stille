@@ -1,5 +1,5 @@
 const sdk = require("matrix-js-sdk")
-const config = require('../../config')
+const config = require('../../config').init()
 
 const showLoginForm = f => {
   const readline = require('readline').createInterface({
