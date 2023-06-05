@@ -4,7 +4,8 @@ const translate = require('./src/plugins/translate')
 const convert = require('./src/plugins/convert')
 
 const app = async () => {
-  bot.init([weather, translate, convert])
+  const plugins = process.argv[3] ? eval(`[${process.argv[3]}]`) : [weather, translate, convert]
+  bot.init(plugins)
 }
 
 app()
