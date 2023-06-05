@@ -1,5 +1,6 @@
 const config = require('../../config').init('weather')
 let apiKey = config.get('apiKey')
+const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const showSettingsForm = f => {
   const readline = require('readline').createInterface({
@@ -116,9 +117,10 @@ const forecast = async place => {
 
   for (let i = 0; i < data.list.length; ++i) {
     const w = data.list[i]
-    const date = new Date(data.list[i].dt * 1000 + data.city.timezone * 1000).toISOString()
-    const day = date.substr(0, 10)
-    const hour = date.substr(11, 2)
+    const date = new Date(data.list[i].dt * 1000 + data.city.timezone * 1000)
+    const isoDate = date.toISOString()
+    const day = isoDate.substr(0, 10)
+    const hour = isoDate.substr(11, 2)
     if (! ret[day]) ret[day] = {
       day: {
         temp: null,
@@ -137,7 +139,8 @@ const forecast = async place => {
         rain: 0,
         snow: 0,
         clouds: {min: null, max: null}
-      }
+      },
+      dayOfWeek: days[date.getDay()]
     }
 
     if (ret[day].day.temp === null || (hour > 12 && hour <=15)) {
@@ -175,7 +178,7 @@ const forecast = async place => {
   const f = []
 
   for (let i in ret) {
-    let s = `${i}`
+    let s = `${ret[i].dayOfWeek}, ${i}`
 
     for (let dayOrNight of ['day', 'night']) {
       const descr = Object.keys(ret[i][dayOrNight].descr)
