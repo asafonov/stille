@@ -25,13 +25,13 @@ const init = f => {
   }
 }
 
-const onMessage = async message => {
+const onMessage = async (message, roomId) => {
   if (message.substr(0, 10).toLowerCase() === 'translate ') {
     const q = message.substr(10)
     const body = new URLSearchParams({
       text: q,
-      source_language: config.get(`from`) || 'en',
-      translation_language: config.get(`to`) || 'ru'
+      source_language: config.get(`from_${roomId}`) || 'en',
+      translation_language: config.get(`to_${roomId}`) || 'ru'
     }).toString()
     const response = await fetch('https://translation-api.translate.com/translate/v1/mt', {
       method: 'POST',
@@ -42,7 +42,7 @@ const onMessage = async message => {
     return data.translation || q
   } else if (message.substr(0, 11).toLowerCase() === '!translate ') {
     const q = message.substr(11).split(' ')
-    config.set(`${q[0]}`, q[1])
+    config.set(`${q[0]}_${roomId}`, q[1])
     config.save()
   }
 }

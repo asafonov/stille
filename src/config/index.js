@@ -15,7 +15,7 @@ const init = name => {
     let data = 'module.exports = {\n'
 
     for (let k in config) {
-      data += `  ${k}: ${JSON.stringify(config[k])},\n`
+      data += `  ${JSON.stringify(k)}: ${JSON.stringify(config[k])},\n`
     }
 
     data += '}'

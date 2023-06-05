@@ -97,7 +97,7 @@ const subscribe = (matrix, plugins) => {
     }
 
     for (let i = 0; i < plugins.length; ++i) {
-      const reply = await plugins[i].onMessage(event.getContent().body)
+      const reply = await plugins[i].onMessage(event.getContent().body, event.getRoomId())
       reply && matrix.sendEvent(room.roomId, 'm.room.message', {msgtype: 'm.text', body: reply}, '')
     }
   })
