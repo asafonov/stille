@@ -31,6 +31,10 @@ Usage
 stille
 ```
 
+Screnshot
+-----
+
+![](screenshot.jpg)
+
 Have fun!
 ---------
-![](screenshot.jpg)
