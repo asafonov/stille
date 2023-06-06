@@ -4,7 +4,14 @@ const init = name => {
   if (! name) name = process.argv[2] || 'mtrxrc'
   if (data[name]) return data[name]
 
-  let filename = `${process.env.HOME}/.config/mtrxrc/${name}.mtrxrc`
+  const fs = require('fs')
+  const dirName = `${process.env.HOME}/.config/stille`
+
+  try {
+    fs.mkdirSync(dirName, {recursive: true})
+  } catch {}
+
+  let filename = `${dirName}/${name}.mtrxrc`
   let config
 
   const init = name => {
@@ -19,7 +26,6 @@ const init = name => {
     }
 
     data += '}'
-    const fs = require('fs')
     fs.writeFileSync(filename, data)
   }
   const get = name => config[name]
