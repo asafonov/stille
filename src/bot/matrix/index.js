@@ -6,8 +6,8 @@ const showLoginForm = f => {
     input: process.stdin,
     output: process.stdout
   })
-  readline.question('host: ', host => {
-    readline.question('user: ', user => {
+  readline.question('Matrix host: ', host => {
+    readline.question('username: ', user => {
       readline.question('password: ', password => {
         readline.close()
         return f(host, user, password)
