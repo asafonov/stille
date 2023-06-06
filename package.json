@@ -1,5 +1,32 @@
 {
   "dependencies": {
     "matrix-js-sdk": "^25.0.0"
-  }
+  },
+  "name": "stille",
+  "description": "Collection of plugin based bots for matrix",
+  "version": "1.1.0",
+  "main": "app.js",
+  "devDependencies": {},
+  "bin": {
+    "stille": "./app.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asafonov/stille.git"
+  },
+  "keywords": [
+    "bot",
+    "matrix",
+    "weather",
+    "cli"
+  ],
+  "author": "Alexander Safonov <me@asafonov.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/asafonov/stille/issues"
+  },
+  "homepage": "https://github.com/asafonov/stille#readme"
 }
