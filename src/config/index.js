@@ -14,10 +14,6 @@ const init = name => {
   let filename = `${dirName}/${name}.mtrxrc`
   let config
 
-  const init = name => {
-    name = process.argv[2] || 'mtrxrc'
-    let filename = `${process.env.HOME}/.config/${name}.mtrxrc`
-  }
   const save = () => {
     let data = 'module.exports = {\n'
 

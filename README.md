@@ -31,7 +31,7 @@ Usage
 stille
 ```
 
-Screnshot
+Screenshot
 -----
 
 ![](screenshot.jpg)

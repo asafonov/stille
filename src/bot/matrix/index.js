@@ -98,6 +98,7 @@ const subscribe = (matrix, plugins) => {
     }
 
     if (! antispam.isAllowedMessage(event.sender.userId, event.getRoomId())) {
+      console.log('SPAM', event.sender.userId, event.getRoomId())
       const antispamErrorMessage = 'Sorry, the administrator of the bot did not allow me to react to your messages'
       matrix.sendEvent(room.roomId, 'm.room.message', {msgtype: 'm.text', body: antispamErrorMessage}, '')
       return
