@@ -1,5 +1,6 @@
 const sdk = require("matrix-js-sdk")
 const config = require('../../config').init()
+const antispam = require('../../utils/antispam')
 
 const showLoginForm = f => {
   const readline = require('readline').createInterface({
@@ -93,6 +94,12 @@ const subscribe = (matrix, plugins) => {
     const age = new Date().getTime() - event.localTimestamp
 
     if (age > 60000) {
+      return
+    }
+
+    if (! antispam.isAllowedMessage(event.sender.userId, event.getRoomId())) {
+      const antispamErrorMessage = 'Sorry, the administrator of the bot did not allow me to react to your messages'
+      matrix.sendEvent(room.roomId, 'm.room.message', {msgtype: 'm.text', body: antispamErrorMessage}, '')
       return
     }
 
