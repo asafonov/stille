@@ -1,7 +1,7 @@
 const data = {}
 
 const init = name => {
-  if (! name) name = process.argv[2] || 'mtrxrc'
+  if (! name) name = 'mtrxrc'
   if (data[name]) return data[name]
 
   const fs = require('fs')
