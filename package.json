@@ -1,12 +1,13 @@
 {
   "dependencies": {
-    "matrix-js-sdk": "^25.0.0"
+    "input": "^1.0.1",
+    "matrix-js-sdk": "^25.0.0",
+    "telegram": "^2.17.10"
   },
   "name": "stille",
   "description": "Collection of plugin based bots for matrix",
   "version": "1.2.0",
   "main": "app.js",
-  "devDependencies": {},
   "bin": {
     "stille": "./app.js"
   },
