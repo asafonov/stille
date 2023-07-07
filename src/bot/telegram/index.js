@@ -2,8 +2,8 @@ const {TelegramClient} = require('telegram')
 const {StringSession} = require('telegram/sessions')
 const {NewMessage} = require('telegram/events')
 const input = require('input')
-const cache = require('../config').init('cache')
-const config = require('../config').init()
+const cache = require('../../config').init('cache')
+const config = require('../../config').init()
 let client
 
 const getMessage = async message => {
@@ -25,9 +25,10 @@ const initApi = async () => {
   let bot
 
   if (! apiId) {
-    apiId = await parseInt(input.text('api id: '))
+    apiId = await input.text('api id: ')
     apiHash = await input.text('api hash: ')
     botToken = await input.text('bot auth token: ')
+    apiId = parseInt(apiId)
     config.set('apiId', apiId)
     config.set('apiHash', apiHash)
     config.set('botToken', botToken)
@@ -49,7 +50,6 @@ const init = async callbacks => {
   cache.save()
   client.addEventHandler(async event => {
     const message = await getMessage(event.message)
-    }
   }, new NewMessage({}))
 }
 
