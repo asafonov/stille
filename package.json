@@ -5,8 +5,8 @@
     "telegram": "^2.17.10"
   },
   "name": "stille",
-  "description": "Collection of plugin based bots for matrix",
-  "version": "1.2.0",
+  "description": "Collection of plugin based bots for Telegram and matrix",
+  "version": "1.3.0",
   "main": "app.js",
   "bin": {
     "stille": "./app.js"
@@ -20,6 +20,7 @@
   },
   "keywords": [
     "bot",
+    "telegram",
     "matrix",
     "weather",
     "cli"

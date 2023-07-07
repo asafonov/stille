@@ -1,7 +1,7 @@
 stille
 =====
 
-stille is a collection of plugin based bots for matrix.
+stille is a collection of plugin based bots for Telegram and matrix.
 
 Currently it contains the following plugins:
 
@@ -27,8 +27,13 @@ That's it, now you can use it
 Usage
 -----
 
+By default matrix bot is active
 ```bash
 stille
+```
+If you want to use Telegram bot insted
+```bash
+stille telegram
 ```
 
 Screenshot
